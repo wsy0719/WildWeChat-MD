@@ -8,47 +8,77 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 Core philosophy: **Serverless, Zero-UI, CSS in Control.**
 
+## Development
+
+**Run locally:**
+```bash
+python3 -m http.server 8000
+```
+Then open `http://localhost:8000` in Chrome. The app also works via `file://` (double-click `index.html`), but the HTTP server is preferred for testing.
+
 ## Architecture
 
-This is a single-page application with no build step, no backend, and no cloud dependency. All logic runs in the browser.
+Single-page application with no build step, no backend, no cloud dependency. All logic runs in the browser.
 
-### Key Technical Decisions
+### Technology Choices
 
-- **No framework** (vanilla HTML/CSS/JS) — keeps it truly zero-dependency on infrastructure
-- **`marked.js`** for Markdown parsing — must support GFM (tables, code blocks) and must NOT strip HTML comments
-- **`juice`** for CSS-to-inline-style conversion — reads `custom.css` and converts all class/tag rules to `style="..."` attributes on each element
-- **Clipboard API** with `text/html` MIME type — writing plain text is a bug; WeChat requires rich text
+| Module | Choice | Reason |
+| --- | --- | --- |
+| Framework | None (Vanilla JS) | Zero dependency, no build step |
+| MD parsing | `marked.js` (CDN) | GFM support (tables, code blocks), doesn't strip HTML comments |
+| CSS inlining | `juice/client.js` (CDN) | Browser-only build, no Node.js required |
+| Clipboard | Clipboard API (native) | Supports `text/html` MIME type required by WeChat |
+
+**CDN scripts (loaded in this order in index.html):**
+```html
+<script src="https://unpkg.com/marked/marked.min.js"></script>
+<script src="https://unpkg.com/juice/client.js"></script>
+<script src="js/clipboard.js"></script>
+<script src="js/app.js"></script>  <!-- last; initializes on DOMContentLoaded -->
+```
+
+### Why No `custom.css` File
+
+`fetch('custom.css')` is blocked by CORS when opened via `file://`. CSS is stored as a `DEFAULT_CSS` string constant in `js/app.js` and used as the initial value of the CSS tab textarea. This naturally enables P1 (CSS hot-reload) without extra architecture.
 
 ### Data Flow
 
 ```
-<textarea> (raw MD)
-  → marked.js → raw HTML string
-  → juice(html, cssText) → HTML with all styles inlined
+<textarea id="md-input"> (raw MD)
+  → marked.parse(md, { gfm: true }) → raw HTML string
+  → juice.inlineContent(html, cssText) → HTML with all styles inlined
   → <div id="preview"> (live preview, right pane)
   → [Copy button] → navigator.clipboard.write([new ClipboardItem({ 'text/html': blob })])
 ```
 
-### Planned File Structure
+### File Structure
 
 ```
-index.html         # single-page app entry, two-column layout
-custom.css         # user-owned CSS; juice reads this to inject inline styles
+index.html         # page entry: layout skeleton + CDN script tags
 js/
-  app.js           # core pipeline: input → marked → juice → preview
+  app.js           # core pipeline + DEFAULT_CSS string constant
   clipboard.js     # Clipboard API: writes text/html MIME type
 docs/
   mvp-prd.md
+  tech-spec.md
 ```
 
-## Hard Constraints (from PRD)
+### Layout (index.html)
 
-Do not add or suggest features that cross these lines:
+- Fixed top bar: app name + 【一键复制微信排版】button
+- Two-column body (flexbox, `height: 100vh`):
+  - Left (50%): Tab switcher
+    - Tab 1 「Markdown」: `<textarea id="md-input">`
+    - Tab 2 「样式 CSS」: `<textarea id="css-input">`
+  - Right (50%): `<div id="preview">`, `overflow-y: scroll`
 
-1. **No image upload / proxy** — broken image URLs are the author's problem at write-time
+## Hard Constraints
+
+1. **No image upload / proxy** — broken image URLs are the author's problem
 2. **No persistence** — no localStorage, no accounts, no cloud; refresh resets everything
-3. **No pseudo-elements or external fonts in CSS** — `::before`, `::after`, `@import url()` are stripped by WeChat's parser; never use them in `custom.css`
+3. **No pseudo-elements or external fonts in CSS** — `::before`, `::after`, `@import url()` are stripped by WeChat's parser; never use them in `DEFAULT_CSS`
+4. **Clipboard MIME type must be `text/html`** — writing `text/plain` is a bug; WeChat requires rich text
 
-## P1 Feature (CSS Hot-Reload Tab)
+## DEFAULT_CSS Requirements
 
-A second tab on the left pane exposes the raw CSS in a `<textarea>`. Edits instantly re-run juice and update the preview. Do not design the core pipeline in a way that prevents adding this later.
+`DEFAULT_CSS` in `js/app.js` must cover: `h1`–`h4`, `p`, `strong`, `em`, inline `code`, `pre`, `pre code`, `blockquote`, `table`, `th`/`td`, `img`. Must not use `::before`, `::after`, or `@import url()`.
