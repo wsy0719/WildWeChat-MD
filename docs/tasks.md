@@ -70,14 +70,14 @@
 
 **目标文件：** `js/clipboard.js`
 
-- [ ] **3.1** 创建 `js/clipboard.js`
-- [ ] **3.2** 实现 `copyHtml()` 函数：
+- [x] **3.1** 创建 `js/clipboard.js`
+- [x] **3.2** 实现 `copyHtml()` 函数：
   - 读取 `preview.innerHTML`
   - 构造 `new Blob([html], { type: 'text/html' })`
   - 调用 `navigator.clipboard.write([new ClipboardItem({ 'text/html': blob })])`
-- [ ] **3.3** 成功后：按钮文字短暂变为「已复制！」，1.5s 后恢复原文
-- [ ] **3.4** 失败后：按钮文字变为「复制失败」，`console.error` 输出错误信息
-- [ ] **3.5** 在 `index.html` 的复制按钮上绑定 `onclick="copyHtml()"`
+- [x] **3.3** 成功后：按钮文字短暂变为「已复制！」，1.5s 后恢复原文
+- [x] **3.4** 失败后：按钮文字变为「复制失败」，`console.error` 输出错误信息
+- [x] **3.5** 在 `index.html` 的复制按钮上绑定 `onclick="copyHtml()"`
 
 **阶段三验收：** 点击复制 → 打开微信公众号编辑器 → `Ctrl+V` → 粘贴结果为富文本（有样式），而非裸文字。
 
@@ -85,12 +85,12 @@
 
 ## 最终约束检查（上线前逐条确认）
 
-- [ ] **C1** 剪贴板写入的 MIME 类型是 `text/html`，不是 `text/plain`
-- [ ] **C2** `DEFAULT_CSS` 中无 `::before`、`::after`、`@import url()`
-- [ ] **C3** 代码中无 `localStorage`、`sessionStorage`、`cookie` 操作
-- [ ] **C4** 代码中无图片上传、代理、Base64 转换逻辑
-- [ ] **C5** 代码中无任何 `fetch` 到业务服务器的请求
-- [ ] **C6** 以 `file://` 协议直接打开 `index.html` 功能完整，无报错
+- [x] **C1** 剪贴板写入的 MIME 类型是 `text/html`，不是 `text/plain`
+- [x] **C2** `DEFAULT_CSS` 中无 `::before`、`::after`、`@import url()`
+- [x] **C3** 代码中无 `localStorage`、`sessionStorage`、`cookie` 操作
+- [x] **C4** 代码中无图片上传、代理、Base64 转换逻辑
+- [x] **C5** 代码中无任何 `fetch` 到业务服务器的请求
+- [x] **C6** 以 `file://` 协议直接打开 `index.html` 功能完整，无报错
 
 ---
 
