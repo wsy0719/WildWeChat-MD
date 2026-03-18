@@ -31,8 +31,8 @@
 
 **目标文件：** `js/app.js`
 
-- [ ] **2.1** 创建 `js/app.js`
-- [ ] **2.2** 定义 `DEFAULT_CSS` 字符串常量，覆盖以下元素（严禁 `::before/::after/@import`）：
+- [x] **2.1** 创建 `js/app.js`
+- [x] **2.2** 定义 `DEFAULT_CSS` 字符串常量，覆盖以下元素（严禁 `::before/::after/@import`）：
   - `h1` ~ `h4`：字号、字重、margin
   - `p`：`line-height: 1.8`、margin
   - `strong`：字重加粗
@@ -45,17 +45,17 @@
   - `th` / `td`：边框、padding
   - `th`：背景色、字重
   - `img`：`max-width: 100%`、`display: block`
-- [ ] **2.3** 配置 marked：`marked.use({ gfm: true })`（HTML 注释默认保留，无需额外配置）
-- [ ] **2.4** 实现 `render()` 函数：
+- [x] **2.3** 配置 marked：`marked.use({ gfm: true })`（HTML 注释默认保留，无需额外配置）
+- [x] **2.4** 实现 `render()` 函数：
   1. 读 `md-input` 的值
   2. 读 `css-input` 的值
   3. `marked.parse(md)` → 原始 HTML
   4. `juice.inlineContent(rawHtml, css)` → 带 inline style 的 HTML
   5. 写入 `preview.innerHTML`
-- [ ] **2.5** 实现 `switchTab(tab)` 函数：
+- [x] **2.5** 实现 `switchTab(tab)` 函数：
   - `tab === 'md'`：显示 `md-input`，隐藏 `css-input`，更新 Tab 按钮 active 状态
   - `tab === 'css'`：反之
-- [ ] **2.6** `DOMContentLoaded` 初始化：
+- [x] **2.6** `DOMContentLoaded` 初始化：
   - 将 `DEFAULT_CSS` 填入 `css-input.value`
   - `md-input` 绑定 `oninput → render`
   - `css-input` 绑定 `oninput → render`

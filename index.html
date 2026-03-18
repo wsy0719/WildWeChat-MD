@@ -60,6 +60,30 @@
       flex-shrink: 0;
     }
 
+    /* ── Tab 导航 ── */
+    .tab-bar {
+      display: flex;
+      gap: 4px;
+      padding: 8px 14px;
+      border-bottom: 1px solid #e8e3dc;
+      flex-shrink: 0;
+    }
+
+    .tab-btn {
+      padding: 5px 12px;
+      border-radius: 5px;
+      font-size: 13px;
+      font-weight: 500;
+      cursor: pointer;
+      border: 1px solid transparent;
+      background: transparent;
+      color: #8a8278;
+      transition: background 0.15s, color 0.15s;
+    }
+
+    .tab-btn:hover { background: #eae6e0; color: #5a5550; }
+    .tab-btn.active { background: #e8e3dc; color: #1a1a1a; border-color: #c8c3bc; }
+
     /* ── 按钮 ── */
     .btn {
       display: inline-flex;
@@ -94,17 +118,6 @@
 
     .btn-primary:hover { background: #c96a48; border-color: #c96a48; }
 
-    .btn-css {
-      background: transparent;
-      border-color: #d8d3cc;
-      color: #8a8278;
-      font-size: 12px;
-      padding: 5px 10px;
-    }
-
-    .btn-css:hover { background: #eae6e0; color: #5a5550; }
-    .btn-css.active { background: #e8e3dc; color: #1a1a1a; border-color: #c8c3bc; }
-
     /* 隐藏的文件输入 */
     #file-input { display: none; }
 
@@ -134,23 +147,6 @@
       line-height: 1.8;
     }
 
-    /* CSS 编辑模式下，右栏显示 textarea */
-    #css-preview-input {
-      display: none;
-      flex: 1;
-      width: 100%;
-      padding: 20px;
-      border: none;
-      outline: none;
-      resize: none;
-      font-family: "Menlo", "Monaco", "Cascadia Code", "Courier New", monospace;
-      font-size: 13.5px;
-      line-height: 1.7;
-      color: #2a2a2a;
-      background: transparent;
-      overflow-y: auto;
-    }
-
     /* ── 滚动条 ── */
     ::-webkit-scrollbar { width: 5px; height: 5px; }
     ::-webkit-scrollbar-track { background: transparent; }
@@ -162,45 +158,31 @@
 
 <div class="layout">
 
-  <!-- 左栏：Markdown 编辑器 -->
+  <!-- 左栏：Tab 编辑区 -->
   <div class="pane-left">
-    <div class="toolbar">
-      <input type="file" id="file-input" accept=".md,.markdown,.txt">
-      <button class="btn btn-ghost" onclick="document.getElementById('file-input').click()">
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-          <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
-          <polyline points="17 8 12 3 7 8"/>
-          <line x1="12" y1="3" x2="12" y2="15"/>
-        </svg>
-        导入 .md 文件
-      </button>
+    <div class="tab-bar">
+      <button class="tab-btn active" id="tab-md" onclick="switchTab('md')">Markdown</button>
+      <button class="tab-btn" id="tab-css" onclick="switchTab('css')">样式 CSS</button>
     </div>
+    <input type="file" id="file-input" accept=".md,.markdown,.txt" style="display:none">
     <textarea id="md-input" placeholder="在此粘贴或编辑 Markdown 内容…&#10;&#10;支持 GFM 语法：标题、表格、代码块、引用等。"></textarea>
+    <textarea id="css-input" placeholder="在此编辑 CSS 样式，实时预览…"></textarea>
   </div>
 
   <!-- 右栏：预览 + 操作栏 -->
   <div class="pane-right">
     <div class="toolbar">
-      <button class="btn btn-css" id="css-toggle-btn" onclick="toggleCssMode()">
-        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-          <circle cx="12" cy="12" r="3"/>
-          <path d="M19.07 4.93a10 10 0 0 1 0 14.14M4.93 4.93a10 10 0 0 0 0 14.14"/>
-        </svg>
-        样式 CSS
-      </button>
       <button class="btn btn-primary" id="copy-btn" onclick="copyHtml()">
         一键复制微信排版
       </button>
     </div>
     <div id="preview"></div>
-    <textarea id="css-preview-input" placeholder="在此编辑 CSS 样式，实时预览…"></textarea>
   </div>
 
 </div>
 
 <!-- CDN -->
-<script src="https://unpkg.com/marked/marked.min.js"></script>
-<script src="https://unpkg.com/juice/client.js"></script>
+<script src="https://unpkg.com/marked@4.3.0/marked.min.js"></script>
 <!-- 业务逻辑 -->
 <script src="js/clipboard.js"></script>
 <script src="js/app.js"></script>

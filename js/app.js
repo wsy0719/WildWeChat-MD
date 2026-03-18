@@ -153,60 +153,67 @@ hr {
 marked.use({ gfm: true });
 
 /* ─────────────────────────────────────────────
+   CSS 内联（替代 juice，纯浏览器实现）
+   ───────────────────────────────────────────── */
+function inlineCSS(html, css) {
+  const cleanCss = css.replace(/\/\*[\s\S]*?\*\//g, '');
+  const rules = [];
+  const ruleRe = /([^{]+)\{([^}]+)\}/g;
+  let m;
+  while ((m = ruleRe.exec(cleanCss)) !== null) {
+    rules.push({ selector: m[1].trim(), declarations: m[2].trim() });
+  }
+
+  const doc = new DOMParser().parseFromString(html, 'text/html');
+
+  for (const { selector, declarations } of rules) {
+    let els;
+    try { els = doc.querySelectorAll(selector); } catch { continue; }
+    for (const el of els) {
+      for (const decl of declarations.split(';')) {
+        const idx = decl.indexOf(':');
+        if (idx === -1) continue;
+        const prop = decl.slice(0, idx).trim();
+        const val  = decl.slice(idx + 1).trim();
+        if (prop && val) el.style.setProperty(prop, val);
+      }
+    }
+  }
+
+  return doc.body.innerHTML;
+}
+
+/* ─────────────────────────────────────────────
    核心 Pipeline
    ───────────────────────────────────────────── */
 function render() {
   const md  = document.getElementById('md-input').value;
-  const css = document.getElementById('css-preview-input').value;
+  const css = document.getElementById('css-input').value;
   const rawHtml = marked.parse(md);
-  const inlined = juice.inlineContent(rawHtml, css);
+  const inlined = inlineCSS(rawHtml, css);
   document.getElementById('preview').innerHTML = inlined;
 }
 
 /* ─────────────────────────────────────────────
-   CSS 模式切换（右栏：预览 ↔ CSS 编辑器）
+   Tab 切换（左栏：Markdown ↔ 样式 CSS）
    ───────────────────────────────────────────── */
-let cssMode = false;
+function switchTab(tab) {
+  const mdInput  = document.getElementById('md-input');
+  const cssInput = document.getElementById('css-input');
+  const tabMd    = document.getElementById('tab-md');
+  const tabCss   = document.getElementById('tab-css');
 
-function toggleCssMode() {
-  cssMode = !cssMode;
-  const preview = document.getElementById('preview');
-  const cssInput = document.getElementById('css-preview-input');
-  const btn = document.getElementById('css-toggle-btn');
-
-  if (cssMode) {
-    preview.style.display = 'none';
-    cssInput.style.display = 'block';
-    btn.classList.add('active');
-    btn.textContent = '← 返回预览';
-  } else {
-    preview.style.display = 'block';
+  if (tab === 'md') {
+    mdInput.style.display  = 'block';
     cssInput.style.display = 'none';
-    btn.classList.remove('active');
-    btn.innerHTML = `
-      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-        <circle cx="12" cy="12" r="3"/>
-        <path d="M19.07 4.93a10 10 0 0 1 0 14.14M4.93 4.93a10 10 0 0 0 0 14.14"/>
-      </svg>
-      样式 CSS`;
-    render();
+    tabMd.classList.add('active');
+    tabCss.classList.remove('active');
+  } else {
+    mdInput.style.display  = 'none';
+    cssInput.style.display = 'block';
+    tabMd.classList.remove('active');
+    tabCss.classList.add('active');
   }
-}
-
-/* ─────────────────────────────────────────────
-   文件导入
-   ───────────────────────────────────────────── */
-function handleFileImport(e) {
-  const file = e.target.files[0];
-  if (!file) return;
-  const reader = new FileReader();
-  reader.onload = (ev) => {
-    document.getElementById('md-input').value = ev.target.result;
-    render();
-  };
-  reader.readAsText(file, 'UTF-8');
-  // 重置 input，允许重复导入同一文件
-  e.target.value = '';
 }
 
 /* ─────────────────────────────────────────────
@@ -214,12 +221,11 @@ function handleFileImport(e) {
    ───────────────────────────────────────────── */
 document.addEventListener('DOMContentLoaded', () => {
   // 填充默认 CSS
-  document.getElementById('css-preview-input').value = DEFAULT_CSS;
+  document.getElementById('css-input').value = DEFAULT_CSS;
 
   // 事件绑定
   document.getElementById('md-input').addEventListener('input', render);
-  document.getElementById('css-preview-input').addEventListener('input', render);
-  document.getElementById('file-input').addEventListener('change', handleFileImport);
+  document.getElementById('css-input').addEventListener('input', render);
 
   // 初始渲染
   render();
